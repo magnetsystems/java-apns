@@ -288,13 +288,25 @@ public class ApnsServiceBuilder {
                 .build());
     }
 
-	private void assertPasswordNotEmpty(String password) {
-		if (password == null || password.length() == 0) {
-            throw new IllegalArgumentException("Passwords must be specified." +
+    // The bug JDK-6879539 was fixed in Java 1.8 (b25).
+    private static boolean sPreJava_1_8;
+
+    static {
+      String v = System.getProperty("java.version");
+      sPreJava_1_8 = v.startsWith("1.7.") || v.startsWith("1.6.") ||
+                     v.startsWith("1.5.");
+    }
+
+    private void assertPasswordNotEmpty(String password) {
+      if (!sPreJava_1_8) {
+        return;
+      }
+      if (password == null || password.length() == 0) {
+          throw new IllegalArgumentException("Passwords must be specified." +
                     "Oracle Java SDK does not support passwordless p12 certificates");
-        }
-	}
-    
+      }
+    }
+
     /**
      * Specify the SSLContext that should be used to initiate the
      * connection to Apple Server.
