@@ -106,12 +106,12 @@ public class ApnsServiceBuilder {
     private ReconnectPolicy reconnectPolicy = ReconnectPolicy.Provided.EVERY_HALF_HOUR.newObject();
     private boolean isQueued;
     private ThreadFactory queueThreadFactory;
-    
+
     private boolean isBatched;
     private int batchWaitTimeInSec;
     private int batchMaxWaitTimeInSec;
     private ScheduledExecutorService batchThreadPoolExecutor;
-    
+
     private ApnsDelegate delegate = ApnsDelegate.EMPTY;
     private Proxy proxy;
     private String proxyUsername;
@@ -120,13 +120,13 @@ public class ApnsServiceBuilder {
     private ThreadFactory errorDetectionThreadFactory;
 
     // The bug JDK-6879539 was fixed in Java 1.8 (b25).
-    private final static boolean sPreJava_1_8;
+    private final static boolean sCheckEmptyPassword = false;
 
-    static {
-      // Any versions less than "1.8.xxx" is pre-1.8.
-      String v = System.getProperty("java.version");
-      sPreJava_1_8 = (v.startsWith("1.") && v.charAt(3) == '.' && (v.charAt(2) - '0') < 8);
-    }
+//    static {
+//      // Check for empty password for "1.8.xxx" and older
+//      String v = System.getProperty("java.version");
+//      sCheckEmptyPassword = (v.startsWith("1.") && v.charAt(3) == '.' && (v.charAt(2) - '0') < 8);
+//    }
 
     /**
      * Constructs a new instance of {@code ApnsServiceBuilder}
@@ -298,12 +298,11 @@ public class ApnsServiceBuilder {
     }
 
     private void assertPasswordNotEmpty(String password) {
-      if (!sPreJava_1_8) {
-        return;
-      }
-      if (password == null || password.length() == 0) {
+      if (sCheckEmptyPassword) {
+        if (password == null || password.length() == 0) {
           throw new IllegalArgumentException("Passwords must be specified." +
                     "Oracle Java SDK does not support passwordless p12 certificates");
+        }
       }
     }
 
@@ -323,7 +322,7 @@ public class ApnsServiceBuilder {
         this.sslContext = sslContext;
         return this;
     }
-    
+
     /**
      * Specify the timeout value to be set in new setSoTimeout in created
      * sockets, for both feedback and push connections, in milliseconds.
@@ -439,11 +438,11 @@ public class ApnsServiceBuilder {
         this.reconnectPolicy = rp;
         return this;
     }
-    
+
     /**
      * Specify if the notification cache should auto adjust.
      * Default is true
-     * 
+     *
      * @param autoAdjustCacheLength the notification cache should auto adjust.
      * @return this
      */
@@ -503,7 +502,7 @@ public class ApnsServiceBuilder {
         this.proxyPassword = proxyPassword;
         return this;
     }
-    
+
     /**
      * Specify the proxy to be used to establish the connections
      * to Apple Servers
@@ -519,11 +518,11 @@ public class ApnsServiceBuilder {
         this.proxy = proxy;
         return this;
     }
-    
+
     /**
      * Specify the number of notifications to cache for error purposes.
      * Default is 100
-     * 
+     *
      * @param cacheLength  Number of notifications to cache for error purposes
      * @return  this
      */
@@ -588,7 +587,7 @@ public class ApnsServiceBuilder {
     public ApnsServiceBuilder asQueued() {
         return asQueued(Executors.defaultThreadFactory());
     }
-    
+
     /**
      * Constructs a new thread with a processing queue to process
      * notification requests.
@@ -602,25 +601,25 @@ public class ApnsServiceBuilder {
         this.queueThreadFactory = threadFactory;
         return this;
     }
-    
+
     /**
      * Construct service which will process notification requests in batch.
      * After each request batch will wait <code>waitTimeInSec (set as 5sec)</code> for more request to come
      * before executing but not more than <code>maxWaitTimeInSec (set as 10sec)</code>
-     * 
+     *
      * Note: It is not recommended to use pooled connection
      */
     public ApnsServiceBuilder asBatched() {
         return asBatched(5, 10);
     }
-    
+
     /**
      * Construct service which will process notification requests in batch.
      * After each request batch will wait <code>waitTimeInSec</code> for more request to come
      * before executing but not more than <code>maxWaitTimeInSec</code>
-     * 
+     *
      * Note: It is not recommended to use pooled connection
-     * 
+     *
      * @param waitTimeInSec
      *            time to wait for more notification request before executing
      *            batch
@@ -630,18 +629,18 @@ public class ApnsServiceBuilder {
     public ApnsServiceBuilder asBatched(int waitTimeInSec, int maxWaitTimeInSec) {
         return asBatched(waitTimeInSec, maxWaitTimeInSec, (ThreadFactory)null);
     }
-    
+
     /**
      * Construct service which will process notification requests in batch.
      * After each request batch will wait <code>waitTimeInSec</code> for more request to come
      * before executing but not more than <code>maxWaitTimeInSec</code>
-     * 
+     *
      * Each batch creates new connection and close it after finished.
-     * In case reconnect policy is specified it will be applied by batch processing. 
+     * In case reconnect policy is specified it will be applied by batch processing.
      * E.g.: {@link ReconnectPolicy.Provided#EVERY_HALF_HOUR} will reconnect the connection in case batch is running for more than half an hour
-     * 
+     *
      * Note: It is not recommended to use pooled connection
-     * 
+     *
      * @param waitTimeInSec
      *            time to wait for more notification request before executing
      *            batch
@@ -658,13 +657,13 @@ public class ApnsServiceBuilder {
      * Construct service which will process notification requests in batch.
      * After each request batch will wait <code>waitTimeInSec</code> for more request to come
      * before executing but not more than <code>maxWaitTimeInSec</code>
-     * 
+     *
      * Each batch creates new connection and close it after finished.
-     * In case reconnect policy is specified it will be applied by batch processing. 
+     * In case reconnect policy is specified it will be applied by batch processing.
      * E.g.: {@link ReconnectPolicy.Provided#EVERY_HALF_HOUR} will reconnect the connection in case batch is running for more than half an hour
-     * 
+     *
      * Note: It is not recommended to use pooled connection
-     * 
+     *
      * @param waitTimeInSec
      *            time to wait for more notification request before executing
      *            batch
@@ -712,7 +711,7 @@ public class ApnsServiceBuilder {
      * Provide a custom source for threads used for monitoring connections.
      *
      * This setting is desired when the application must obtain threads from a
-     * controlled environment Google App Engine. 
+     * controlled environment Google App Engine.
      * @param threadFactory
      *            thread factory to use for error detection
      * @return  this
@@ -748,7 +747,7 @@ public class ApnsServiceBuilder {
         if (isQueued) {
             service = new QueuedApnsService(service, queueThreadFactory);
         }
-        
+
         if (isBatched) {
             service = new BatchApnsService(conn, feedback, batchWaitTimeInSec, batchMaxWaitTimeInSec, batchThreadPoolExecutor);
         }
@@ -759,14 +758,16 @@ public class ApnsServiceBuilder {
     }
 
     private void checkInitialization() {
-        if (sslContext == null)
-            throw new IllegalStateException(
-                    "SSL Certificates and attribute are not initialized\n"
-                    + "Use .withCert() methods.");
-        if (gatewayHost == null || gatewayPort == -1)
-            throw new IllegalStateException(
-                    "The Destination APNS server is not stated\n"
-                    + "Use .withDestination(), withSandboxDestination(), "
-                    + "or withProductionDestination().");
+        if (sslContext == null) {
+          throw new IllegalStateException(
+                  "SSL Certificates and attribute are not initialized\n"
+                  + "Use .withCert() methods.");
+        }
+        if (gatewayHost == null || gatewayPort == -1) {
+          throw new IllegalStateException(
+                  "The Destination APNS server is not stated\n"
+                  + "Use .withDestination(), withSandboxDestination(), "
+                  + "or withProductionDestination().");
+        }
     }
 }
