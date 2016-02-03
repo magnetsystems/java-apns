@@ -119,6 +119,15 @@ public class ApnsServiceBuilder {
     private boolean errorDetection = true;
     private ThreadFactory errorDetectionThreadFactory;
 
+    // The bug JDK-6879539 was fixed in Java 1.8 (b25).
+    private final static boolean sPreJava_1_8;
+
+    static {
+      // Any versions less than "1.8.xxx" is pre-1.8.
+      String v = System.getProperty("java.version");
+      sPreJava_1_8 = (v.startsWith("1.") && v.charAt(3) == '.' && (v.charAt(2) - '0') < 8);
+    }
+
     /**
      * Constructs a new instance of {@code ApnsServiceBuilder}
      */
@@ -286,15 +295,6 @@ public class ApnsServiceBuilder {
                 .withCertificateKeyStore(keyStore, password, alias)
                 .withDefaultTrustKeyStore()
                 .build());
-    }
-
-    // The bug JDK-6879539 was fixed in Java 1.8 (b25).
-    private static boolean sPreJava_1_8;
-
-    static {
-      String v = System.getProperty("java.version");
-      sPreJava_1_8 = v.startsWith("1.7.") || v.startsWith("1.6.") ||
-                     v.startsWith("1.5.");
     }
 
     private void assertPasswordNotEmpty(String password) {

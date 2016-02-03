@@ -2,9 +2,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.notnoop.apns</groupId>
     <artifactId>apns</artifactId>
-    <version>1.0.0.Beta7-SNAPSHOT</version>
+    <version>1.0.0.Beta7p1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Java Apple Push Notification Service Library</name>
+    <name>Java Apple Push Notification Service Library (Patch 1)</name>
 
     <!-- Inherit the Sonatype OSS deployment configuration -->
     <parent>
