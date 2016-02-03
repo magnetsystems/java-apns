@@ -13,16 +13,19 @@
         <version>9</version>
     </parent>
     
+
     <distributionManagement>
-      <snapshotRepository>
-         <id>libs-snapshot-local</id>
-         <url>http://dev-repo.magnet.com:8081/artifactory/libs-snapshot-local</url>
-      </snapshotRepository>
-      <repository>
-         <id>libs-release-local</id>
-         <url>http://dev-repo.magnet.com:8081/artifactory/libs-release-local</url>
-      </repository>
-   </distributionManagement>
+        <repository>
+            <id>libs-release-local</id>
+            <name>Releases</name>
+            <url>${env.MAVEN_RELEASES_URL}</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshot-local</id>
+            <name>Snapshots</name>
+            <url>${env.MAVEN_SNAPSHOTS_URL}</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <scm>
         <connection>scm:git:git://github.com/notnoop/java-apns.git</connection>
